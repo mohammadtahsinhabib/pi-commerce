@@ -20,8 +20,8 @@ def view_product(request):
 
 
 @api_view()
-def view_single_product(request, pk):
-    product = get_object_or_404(Product,pk=pk)
+def view_single_product(request, id):
+    product = get_object_or_404(Product,pk=id)
     product_data = ProductSerializer(product,context = {"request":request}).data
     return Response({"product": product_data})
 
