@@ -18,6 +18,11 @@ class ProductSerializer(serializers.ModelSerializer):
     def calculate_tax(self, product):
         tax_rate = Decimal("0.15")
         return product.price * tax_rate
+    
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Price must be greater than zero.")
+        return value
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

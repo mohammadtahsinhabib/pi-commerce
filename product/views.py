@@ -39,9 +39,9 @@ def view_categories(request):
 
     if request.method == "POST":
         serializer = CategorySerializer(data=request.data,context = {"request": request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     category = Category.objects.annotate(product_count = Count("products")).order_by("-id").all()
