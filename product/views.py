@@ -4,18 +4,23 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Count
 from product.models import Category, Product
-
+from rest_framework import status
 from .serializers import CategorySerializer, ProductSerializer
 
 # Create your views here.
 
 
-@api_view()
+@api_view(["GET", "POST"])
 def view_product(request):
-    # Using select_related to optimize the query by fetching related category data in one go
+    if request.method == "POST":
+        serializer = ProductSerializer(data=request.data,context ={"request": request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     product = Product.objects.select_related("category").all()
 
-    # product_data = [ProductSerializer(p).data for p in product]
     product_data = ProductSerializer(
         product, many=True, context={"request": request}
     ).data
@@ -29,23 +34,17 @@ def view_single_product(request, product_id):
     product_data = ProductSerializer(product, context={"request": request}).data
     return Response({"product": product_data})
 
-
-"""
-    if we don't want to use get_object_or_404, we can use try-except block
-    to handle the case where the product does not exist.
-    try:
-        product = Product.objects.get(pk=product_id)
-        product_data = {"id": product.id, "name": product.name, "price": product.price}
-        return Response({"product": product_data})
-    except Product.DoesNotExist:  
-        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-"""
-
-
-@api_view()
+@api_view(["GET", "POST"])
 def view_categories(request):
-    category = Category.objects.annotate(product_count = Count("products")).all()
 
+    if request.method == "POST":
+        serializer = CategorySerializer(data=request.data,context = {"request": request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    category = Category.objects.annotate(product_count = Count("products")).order_by("-id").all()
     category_data = CategorySerializer(category, many=True).data
     return Response({"categories": category_data})
 
