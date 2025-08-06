@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from django.db.models import Count
 from product.models import Category, Product
 
 from .serializers import CategorySerializer, ProductSerializer
@@ -44,13 +44,14 @@ def view_single_product(request, product_id):
 
 @api_view()
 def view_categories(request):
-    category = Category.objects.all()
+    category = Category.objects.annotate(product_count = Count("products")).all()
+
     category_data = CategorySerializer(category, many=True).data
     return Response({"categories": category_data})
 
 
 @api_view()
 def view_single_category(request, id):
-    category = get_object_or_404(Category, pk=id)
+    category = get_object_or_404(Category.objects.annotate(product_count=Count("products")), pk=id)
     category_data = CategorySerializer(category).data
     return Response({"category": category_data})
