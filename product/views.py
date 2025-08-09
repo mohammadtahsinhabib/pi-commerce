@@ -4,11 +4,22 @@ from .serializers import CategorySerializer, ProductSerializer,ProductReviewSeri
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-# Create your views here.
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter,OrderingFilter
+from product.filters import ProductFilter
+from product.paginations import CustomPagination
 
 class ProductsViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+    search_fields = ["name", "description","category__name"]
+    ordering_fields = ["price", "created_at"]
+    filterset_class = ProductFilter
+
+        
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -24,5 +35,12 @@ class CategoriesViewSet(ModelViewSet):
     lookup_field = "id"
 
 class ProductReviewViewSet(ModelViewSet):
-    queryset = ProductReview.objects.all()
     serializer_class = ProductReviewSerializer
+
+    def get_queryset(self):
+        return ProductReview.objects.filter(product_id=self.kwargs["product_pk"])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["product_id"] = self.kwargs.get("product_pk")
+        return context

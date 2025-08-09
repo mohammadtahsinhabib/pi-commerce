@@ -1,7 +1,7 @@
 from decimal import Decimal
 from rest_framework import serializers
 from product.models import Category, Product,ProductReview
-
+from django.shortcuts import get_object_or_404
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,14 +35,21 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
-        fields = ["id", "product", "rating", "comment", "created_at"]
+        fields = ["id", "user", "rating", "comment", "created_at", "product"]
+        read_only_fields = ["created_at"]   
     
     product = serializers.HyperlinkedRelatedField(
-        queryset=Product.objects.all(),
-        view_name="products-detail",
-        lookup_field="id",
+        view_name="product-detail",
+        read_only=True,
+        lookup_field="pk",
     )
     
+    def create(self, validated_data):
+        product_id = self.context["product_id"]
+        return ProductReview.objects.create(product_id = product_id, **validated_data)
+        
+
+
     def validate_rating(self, value):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
