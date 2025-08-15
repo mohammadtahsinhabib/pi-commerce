@@ -9,8 +9,7 @@ from product.filters import ProductFilter
 from product.models import Category, Product, ProductReview
 from product.paginations import CustomPagination
 
-from .serializers import (CategorySerializer, ProductReviewSerializer,
-                          ProductSerializer)
+from .serializers import CategorySerializer, ProductReviewSerializer, ProductSerializer
 
 
 class ProductsViewSet(ModelViewSet):
