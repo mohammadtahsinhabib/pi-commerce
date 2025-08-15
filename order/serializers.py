@@ -1,0 +1,46 @@
+from rest_framework import serializers
+
+from product.models import Product
+
+from .models import Cart, CartItem
+
+
+class SimpleProductSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        fields = ["id", "name", "price"]
+        read_only_fields = [
+            "id",
+            "name",
+            "price",
+        ]
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer(read_only=True)
+    total_price = serializers.SerializerMethodField(method_name="get_total")
+
+    class Meta:
+        model = CartItem
+        fields = ["id", "product", "quantity", "total_price"]
+        read_only_fields = ["id", "product", "total_price"]
+
+    def get_total(self, cart_item: CartItem):
+        return cart_item.quantity * cart_item.product.price
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    grand_total = serializers.SerializerMethodField(method_name="get_grand_total")
+
+    class Meta:
+        model = Cart
+        fields = ["id", "user", "items", "grand_total"]
+        read_only_fields = ["id"]
+
+    def get_grand_total(self, cart: Cart):
+        total = 0
+        for item in cart.items.all():
+            total += item.product.price * item.quantity
+        return total

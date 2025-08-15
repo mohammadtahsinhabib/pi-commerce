@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "debug_toolbar",
     "rest_framework",
-    'django_filters',
+    "django_filters",
     "djoser",
     "users",
     "api",
