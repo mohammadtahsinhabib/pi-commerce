@@ -1,10 +1,12 @@
 from decimal import Decimal
-
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from product.models import Category, Product, ProductReview
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,10 +39,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField(method_name="get_user")
     class Meta:
         model = ProductReview
-        fields = ["id", "user", "rating", "comment", "created_at", "product"]
-        read_only_fields = ["created_at"]
+        fields = ["id", "user", "rating", "comment", "created_at","updated_at", "product"]
+        read_only_fields = ["id","created_at", "updated_at", "product","user"]
 
     product = serializers.HyperlinkedRelatedField(
         view_name="product-detail",
@@ -48,6 +51,9 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         lookup_field="pk",
     )
 
+    def get_user(self,obj):
+        return SimpleUserSerializer(obj.user).data
+    
     def create(self, validated_data):
         product_id = self.context["product_id"]
         return ProductReview.objects.create(product_id=product_id, **validated_data)
@@ -56,3 +62,13 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
+
+
+class SimpleUserSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField(method_name="get_user_name")
+    class Meta:
+        model = User
+        fields = ["id", "user"]
+    
+    def get_user_name(self,obj):
+        return obj.username or obj.get_full_name() or "Anonymous"

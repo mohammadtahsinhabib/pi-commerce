@@ -4,12 +4,17 @@ from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-
 from product.filters import ProductFilter
 from product.models import Category, Product, ProductReview
 from product.paginations import CustomPagination
+from .serializers import CategorySerializer, ProductReviewSerializer, ProductSerializer , SimpleUserSerializer
+from api.permissions import IsAdminOrReadOnly
+from rest_framework.permissions import IsAdminUser, AllowAny
+from api.permissions import CustomDjangoModelPermissions
+from product.permissions import IsReviewAuthorOrReadOnly
 
-from .serializers import CategorySerializer, ProductReviewSerializer, ProductSerializer
+
+
 
 
 class ProductsViewSet(ModelViewSet):
@@ -20,7 +25,15 @@ class ProductsViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ["name", "description", "category__name"]
     ordering_fields = ["price", "created_at"]
+    permission_classes = [IsAdminOrReadOnly]
     filterset_class = ProductFilter
+
+    def get_permissions(self):
+        if self.request.method in ["POST", "PUT", "PATCH", "DELETE"]:
+            return [IsAdminUser()]
+        
+        return [AllowAny()]
+
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -37,10 +50,20 @@ class CategoriesViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = "id"
+    permission_classes = [CustomDjangoModelPermissions]
 
 
 class ProductReviewViewSet(ModelViewSet):
     serializer_class = ProductReviewSerializer
+    permission_classes = [IsReviewAuthorOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
+        
+        
 
     def get_queryset(self):
         return ProductReview.objects.filter(product_id=self.kwargs["product_pk"])
