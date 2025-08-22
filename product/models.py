@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-
+from cloudinary.models import CloudinaryField
 # Create your models here.
 
 
@@ -45,7 +45,7 @@ class ProductReview(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to='products/images/')
+    image = CloudinaryField('image')
     alt_text = models.CharField(max_length=255, blank=True, null=True)
     
 

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "djoser",
+    "cloudinary",
     "users",
     "api",
     "order",
@@ -82,11 +83,11 @@ WSGI_APPLICATION = "pi_commerce.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'masteruser',
-        'PASSWORD': '12345678',
-        'HOST': 'w3-django-project.cdxmgq9zqqlr.us-east-1.rds.amazonaws.com',
-        'PORT': '5432'
+        'NAME': config('dbname'),
+        'USER': config('user'),
+        'PASSWORD': config('password'),
+        'HOST': config('host'),
+        'PORT': config('port'),
     }
 }
 
@@ -180,3 +181,15 @@ SWAGGER_SETTINGS = {
       }
    }
 }
+
+
+import cloudinary
+
+cloudinary.config( 
+  cloud_name = "dsyexjkec", 
+  api_key = "147143614165615",
+  api_secret = "cIllZbbIwc9ulMZBaigTB78gqTE",
+  secure = True
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
