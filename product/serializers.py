@@ -11,6 +11,7 @@ User = get_user_model()
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
     class Meta:
         model = ProductImage
         fields = ["id","image","product"]
