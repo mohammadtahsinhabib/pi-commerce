@@ -1,3 +1,5 @@
+from .serializers import ProductImageSerializer
+from .models import ProductImage
 from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
@@ -7,14 +9,16 @@ from rest_framework.viewsets import ModelViewSet
 from product.filters import ProductFilter
 from product.models import Category, Product, ProductReview
 from product.paginations import CustomPagination
-from .serializers import CategorySerializer, ProductReviewSerializer, ProductSerializer , SimpleUserSerializer
+from .serializers import (
+    CategorySerializer,
+    ProductReviewSerializer,
+    ProductSerializer,
+    SimpleUserSerializer,
+)
 from api.permissions import IsAdminOrReadOnly
 from rest_framework.permissions import IsAdminUser, AllowAny
 from api.permissions import CustomDjangoModelPermissions
 from product.permissions import IsReviewAuthorOrReadOnly
-
-
-
 
 
 class ProductsViewSet(ModelViewSet):
@@ -31,9 +35,8 @@ class ProductsViewSet(ModelViewSet):
     def get_permissions(self):
         if self.request.method in ["POST", "PUT", "PATCH", "DELETE"]:
             return [IsAdminUser()]
-        
-        return [AllowAny()]
 
+        return [AllowAny()]
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -59,16 +62,31 @@ class ProductReviewViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-    
+
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
-        
-        
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return ProductReview.objects.none()
+
         return ProductReview.objects.filter(product_id=self.kwargs["product_pk"])
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["product_id"] = self.kwargs.get("product_pk")
         return context
+
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+    permission_classes = [IsAdminUser]
+    
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return ProductImage.objects.none()
+
+        return ProductImage.objects.filter(product_id=self.kwargs["product_pk"])
+    
+    def perform_create(self, serializer):
+        product = get_object_or_404(Product, pk=self.kwargs["product_pk"])
+        serializer.save(product=product)

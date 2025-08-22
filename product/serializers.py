@@ -1,17 +1,35 @@
+
 from decimal import Decimal
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
+from .models import Product, Category, ProductReview, ProductImage
 from product.models import Category, Product, ProductReview
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ["id","image","product"]
+        
+
+    product = serializers.HyperlinkedRelatedField(
+        view_name="product-detail",
+        read_only=True,
+        lookup_field="pk",
+    )
+
+    
+    
+
 class ProductSerializer(serializers.ModelSerializer):
+    image = ProductImageSerializer(many=True, read_only=True)
     class Meta:
         model = Product
-        fields = ["id", "name", "description", "stock", "price", "category", "tax"]
+        fields = ["id", "name", "description", "stock", "price", "category", "tax","image"]
 
     tax = serializers.SerializerMethodField(method_name="calculate_tax")
     category = serializers.HyperlinkedRelatedField(
@@ -40,10 +58,19 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(method_name="get_user")
+
     class Meta:
         model = ProductReview
-        fields = ["id", "user", "rating", "comment", "created_at","updated_at", "product"]
-        read_only_fields = ["id","created_at", "updated_at", "product","user"]
+        fields = [
+            "id",
+            "user",
+            "rating",
+            "comment",
+            "created_at",
+            "updated_at",
+            "product",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at", "product", "user"]
 
     product = serializers.HyperlinkedRelatedField(
         view_name="product-detail",
@@ -51,9 +78,9 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         lookup_field="pk",
     )
 
-    def get_user(self,obj):
+    def get_user(self, obj):
         return SimpleUserSerializer(obj.user).data
-    
+
     def create(self, validated_data):
         product_id = self.context["product_id"]
         return ProductReview.objects.create(product_id=product_id, **validated_data)
@@ -66,9 +93,11 @@ class ProductReviewSerializer(serializers.ModelSerializer):
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(method_name="get_user_name")
+
     class Meta:
         model = User
         fields = ["id", "user"]
-    
-    def get_user_name(self,obj):
-        return obj.username or obj.get_full_name() or "Anonymous"
+
+    def get_user_name(self, obj):
+        return obj.username or obj.get_full_name() 
+

@@ -21,3 +21,4 @@ venv/
 #Dummy Data
 fixtures/
 token.json
+.env/
