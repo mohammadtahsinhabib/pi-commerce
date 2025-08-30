@@ -5,7 +5,7 @@ from .models import *
 class CategorySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
-    descriptions = serializers.CharField()
+    description = serializers.CharField()
 
 
 
@@ -14,7 +14,11 @@ class ProductSerializer(serializers.Serializer):
     name =serializers.CharField()
     unit_price = serializers.DecimalField(max_digits=10,decimal_places=2,source="price")
     price_with_tax = serializers.SerializerMethodField(method_name="calculate_tax")
-    category = CategorySerializer()
+    # category = CategorySerializer()
+    category = serializers.HyperlinkedRelatedField(
+        queryset = Category.objects.all(),
+        view_name = "view-specific-category"
+    )
     
     
 

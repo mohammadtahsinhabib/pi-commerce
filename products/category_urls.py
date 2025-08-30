@@ -2,5 +2,6 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path("categories/",view_category,name="view-category")
+    path("categories/",view_categories,name="view-category"),
+    path("categories/<int:pk>/",view_category,name="view-specific-category"),
 ]
