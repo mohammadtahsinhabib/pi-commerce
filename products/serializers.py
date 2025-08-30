@@ -17,7 +17,8 @@ class ProductSerializer(serializers.Serializer):
     # category = CategorySerializer()
     category = serializers.HyperlinkedRelatedField(
         queryset = Category.objects.all(),
-        view_name = "view-specific-category"
+        view_name = "view-specific-category",
+        lookup_field = 'id'
     )
     
     

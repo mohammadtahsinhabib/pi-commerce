@@ -25,7 +25,7 @@ def view_categories(request):
 
 
 @api_view()
-def view_category(request,pk):
-    category = get_object_or_404(Category,pk =pk)
+def view_category(request,id):
+    category = get_object_or_404(Category,id = id )
     serialize = CategorySerializer(category)
     return Response(serialize.data)
