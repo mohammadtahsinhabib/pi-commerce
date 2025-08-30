@@ -2,23 +2,26 @@ from django.db.models import Count
 from rest_framework.viewsets import ModelViewSet
 from .models import *
 from .serializers import *
-
+from django_filters.rest_framework import DjangoFilterBackend
+from products.filters import ProductFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
+from products.paginations import DefaultPagination
 
 class ProductViewSet(ModelViewSet):
-
-    
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    lookup_field = "id"
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ProductFilter
+    pagination_class = DefaultPagination
+    search_fields = ['name', 'description']
+    ordering_fields = ['price', 'updated_at']
 
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        category_id = self.request.query_params.get("category_id")
-        if category_id is not None:
-            Product.objects.filter(category_id=category_id)
-        
-        return queryset
-        
-
+    def destroy(self, request, *args, **kwargs):
+        product = self.get_object()
+        if product.stock > 10:
+            return Response({'message': "Product with stock more than 10 could not be deleted"})
+        self.perform_destroy(product)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CategoryViewSet(ModelViewSet):
