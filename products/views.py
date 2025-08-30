@@ -1,7 +1,7 @@
 from django.db.models import Count
 from rest_framework.viewsets import ModelViewSet
-from .models import Product, Category
-from .serializers import ProductSerializer, CategorySerializer
+from .models import *
+from .serializers import *
 
 
 class ProductViewSet(ModelViewSet):
@@ -34,3 +34,14 @@ class CategoryViewSet(ModelViewSet):
 
     def get_queryset(self):
         return Category.objects.annotate(product_count=Count("products"))
+
+
+
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs['product_id'])
+
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_id']}
