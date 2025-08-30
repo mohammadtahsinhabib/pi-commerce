@@ -1,5 +1,7 @@
 from .serializers import *
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
+
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -17,15 +19,15 @@ def view_product(request,id):
     serialize = ProductSerializer(product,context = {"request":request})
     return Response(serialize.data)
 
-@api_view()
+@api_view(["GET","POST"])
 def view_categories(request):
-    category = Category.objects.all()
+    category = Category.objects.annotate(product_count=Count("products")).all()
     serialize = CategorySerializer(category,many = True)
     return Response(serialize.data)
 
 
 @api_view()
 def view_category(request,id):
-    category = get_object_or_404(Category,id = id )
+    category = get_object_or_404(Category.objects.annotate(product_count=Count("products")).all(),id = id )
     serialize = CategorySerializer(category)
     return Response(serialize.data)
