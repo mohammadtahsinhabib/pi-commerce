@@ -1,49 +1,33 @@
 from django.db.models import Count
-from django.shortcuts import get_object_or_404
-from rest_framework.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView
-)
+from rest_framework.viewsets import ModelViewSet
 from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer
 
 
-class ProductListCreateView(ListCreateAPIView):
+class ProductViewSet(ModelViewSet):
     """
-    GET: List all products
-    POST: Create a new product
-    """
-    queryset = Product.objects.select_related("category").all()
-    serializer_class = ProductSerializer
-
-
-class ProductDetailView(RetrieveUpdateDestroyAPIView):
-    """
-    GET: Retrieve a product
-    PUT: Update a product
-    DELETE: Delete a product
+    Supports:
+    - GET /products/ → list all products
+    - POST /products/ → create a product
+    - GET /products/{id}/ → retrieve a product
+    - PUT /products/{id}/ → update a product
+    - PATCH /products/{id}/ → partial update
+    - DELETE /products/{id}/ → delete a product
     """
     queryset = Product.objects.select_related("category").all()
     serializer_class = ProductSerializer
     lookup_field = "id"
 
 
-class CategoryListCreateView(ListCreateAPIView):
+class CategoryViewSet(ModelViewSet):
     """
-    GET: List all categories with product counts
-    POST: Create a new category
-    """
-    serializer_class = CategorySerializer
-
-    def get_queryset(self):
-        return Category.objects.annotate(product_count=Count("products"))
-
-
-class CategoryDetailView(RetrieveUpdateDestroyAPIView):
-    """
-    GET: Retrieve a single category with product count
-    PUT: Update a category
-    DELETE: Delete a category
+    Supports:
+    - GET /categories/ → list all categories with product counts
+    - POST /categories/ → create a category
+    - GET /categories/{id}/ → retrieve a category
+    - PUT /categories/{id}/ → update a category
+    - PATCH /categories/{id}/ → partial update
+    - DELETE /categories/{id}/ → delete a category
     """
     serializer_class = CategorySerializer
     lookup_field = "id"
