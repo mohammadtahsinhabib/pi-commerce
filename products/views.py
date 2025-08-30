@@ -5,18 +5,20 @@ from .serializers import *
 
 
 class ProductViewSet(ModelViewSet):
-    """
-    Supports:
-    - GET /products/ → list all products
-    - POST /products/ → create a product
-    - GET /products/{id}/ → retrieve a product
-    - PUT /products/{id}/ → update a product
-    - PATCH /products/{id}/ → partial update
-    - DELETE /products/{id}/ → delete a product
-    """
-    queryset = Product.objects.select_related("category").all()
+
+    
     serializer_class = ProductSerializer
     lookup_field = "id"
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        category_id = self.request.query_params.get("category_id")
+        if category_id is not None:
+            Product.objects.filter(category_id=category_id)
+        
+        return queryset
+        
+
 
 
 class CategoryViewSet(ModelViewSet):
