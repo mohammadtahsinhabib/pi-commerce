@@ -133,7 +133,8 @@ DJOSER = {
     # 'ACTIVATION_URL': '#/activate/{uid}/{token}',
     # 'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
-        "user_create":"users.serializers.UserCreateSerializer"
+        "user_create":"users.serializers.UserCreateSerializer",
+        "current_user":"users.serializers.UserSerializer"
     },
 }
 
@@ -141,11 +142,15 @@ REST_FRAMEWORK = {
     "COERCE_DECIMAL_TO_STRING": False,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        
     ),
+    #  'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ]
 }
 
-
+from datetime import timedelta
 SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('JWT',),
+   "ACCESS_TOKEN_LIFETIME":timedelta(days=120),
+   "REFRESH_TOKEN_LIFETIME":timedelta(days=360),
 }

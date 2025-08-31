@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from products.filters import ProductFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
 from products.paginations import DefaultPagination
+from rest_framework.permissions import * 
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
@@ -15,6 +16,7 @@ class ProductViewSet(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'updated_at']
+    permission_classes = [AllowAny]
 
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
