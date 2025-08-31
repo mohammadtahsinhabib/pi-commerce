@@ -25,15 +25,7 @@ class ProductViewSet(ModelViewSet):
 
 
 class CategoryViewSet(ModelViewSet):
-    """
-    Supports:
-    - GET /categories/ → list all categories with product counts
-    - POST /categories/ → create a category
-    - GET /categories/{id}/ → retrieve a category
-    - PUT /categories/{id}/ → update a category
-    - PATCH /categories/{id}/ → partial update
-    - DELETE /categories/{id}/ → delete a category
-    """
+
     serializer_class = CategorySerializer
     lookup_field = "id"
 
