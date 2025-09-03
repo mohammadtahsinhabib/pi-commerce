@@ -12,7 +12,7 @@ from .permissions import *
 
 
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
@@ -20,6 +20,9 @@ class ProductViewSet(ModelViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["price", "updated_at"]
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return Product.objects.prefetch_related("images").all()
 
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
@@ -51,13 +54,21 @@ class ReviewViewSet(ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        return Review.objects.filter(product_id=self.kwargs["product_pk"])
+        return Review.objects.filter(product_id=self.kwargs.get("product_pk"))
 
     def get_serializer_context(self):
-        return {"product_id": self.kwargs["product_pk"]}
+        return {"product_id": self.kwargs.get("product_pk")}
 
 
 class ProductImageViewSet(ModelViewSet):
+    """
+    API endpoint for managing products in the e-commerce store
+    - Allows authenticated admin to create, update, and delete products
+    - Allows users to browse and filter product
+    - Support searching by name, description, and category
+    - Support ordering by price and updated_at
+    """
+
     serializer_class = ProductImageSerializer
     permission_classes = [IsAdminOrReadOnly]
 

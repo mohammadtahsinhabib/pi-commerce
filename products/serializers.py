@@ -11,6 +11,14 @@ class CategorySerializer(serializers.ModelSerializer):
     product_count = serializers.IntegerField()
 
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ["id", "image"]
+
+    image = serializers.ImageField()
+
+
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -22,9 +30,11 @@ class ProductSerializer(serializers.ModelSerializer):
             "stock",
             "category",
             "price_with_tax",
+            "images",
         ]
 
     price_with_tax = serializers.SerializerMethodField(method_name="calculate_tax")
+    images = ProductImageSerializer(many=True)
 
     def calculate_tax(self, product):
         return round(product.price * Decimal(1.1), 2)
@@ -58,9 +68,3 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return SimpleUserSerializer(obj.user).data
-
-
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ["id", "image"]
