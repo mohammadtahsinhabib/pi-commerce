@@ -3,7 +3,7 @@ from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = "django-insecure--e$%m_9!n4b20&o^7bg7d1%n-k@orae_v7rnx16my4qm%3w9ex"
 
 
 DEBUG = False
@@ -61,17 +61,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "pi__commerce.wsgi.app"
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
