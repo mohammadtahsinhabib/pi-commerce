@@ -12,7 +12,7 @@ schema_view = get_schema_view(
     openapi.Info(
         title="Pi-Commerce API",
         default_version="v1",
-        description="Test description",
+        description="API documentation for PI Commerce",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@snippets.local"),
         license=openapi.License(name="BSD License"),
