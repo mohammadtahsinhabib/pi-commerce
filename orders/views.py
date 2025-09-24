@@ -5,10 +5,12 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     DestroyModelMixin,
 )
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from orders.serializers import *
 from orders.models import Cart, CartItem
 from rest_framework.decorators import action
+from rest_framework import status
 
 
 class CartViewSet(
@@ -25,7 +27,14 @@ class CartViewSet(
 
     def perform_create(self, serializer):
         serializers.save(user=self.request.user)
+    
+    def create(self,request,*args,**kwargs):
+        existing_cart = Cart.objects.filter(user=request.user)
 
+        if existing_cart:
+            serializers = CartSerializer(existing_cart)
+            return Response(serializers.data,status = status.HTTP_200_OK)
+        return super().create(request ,*args,**kwargs)
 
 class CartItemViewSet(ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete"]
